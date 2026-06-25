@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">Settings</h1>
+</div>
+
+{% if success %}
+<div class="notice notice-success">{{ success }}</div>
+{% endif %}
+{% if error %}
+<div class="notice notice-error">{{ error }}</div>
+{% endif %}
+
+<form method="post" action="{{ url_for('settings') }}" class="settings-form">
+
+  <section class="settings-section">
+    <h2 class="section-title">Lidarr Connection</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="lidarr_url">Lidarr URL</label>
+      <input class="form-input" type="url" id="lidarr_url" name="lidarr_url"
+             value="{{ config.get('lidarr_url', '') }}"
+             placeholder="http://192.168.1.100:8686" required>
+      <p class="form-hint">Base URL of your Lidarr instance — no trailing slash.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="lidarr_api_key">API Key</label>
+      <input class="form-input form-input--mono" type="text" id="lidarr_api_key" name="lidarr_api_key"
+             value="{{ config.get('lidarr_api_key', '') }}"
+             placeholder="Your Lidarr API key" required autocomplete="off">
+      <p class="form-hint">Found in Lidarr under Settings &rarr; General &rarr; Security.</p>
+    </div>
+
+    <div class="form-inline-action">
+      <button type="button" class="btn btn-ghost btn-sm" onclick="testConnection()">
+        <svg class="icon"><use href="#ic-check"/></svg>
+        Test Connection
+      </button>
+      <span id="test-result" class="test-result"></span>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2 class="section-title">Last.fm Integration</h2>
+    <p class="section-desc">
+      Last.fm is required for artist discovery. Get a free API key at
+      <a href="https://www.last.fm/api/account/create" target="_blank" rel="noopener">last.fm/api</a>.
+    </p>
+
+    <div class="form-group">
+      <label class="form-label" for="lastfm_api_key">Last.fm API Key</label>
+      <input class="form-input form-input--mono" type="text" id="lastfm_api_key" name="lastfm_api_key"
+             value="{{ config.get('lastfm_api_key', '') }}"
+             placeholder="Your Last.fm API key" autocomplete="off">
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2 class="section-title">Discovery Sources</h2>
+    <p class="section-desc">Sources are queried together and merged. Enable any combination — at least one is required.</p>
+
+    <div class="source-grid">
+      <div class="source-card">
+        <div class="source-card-header">
+          <span class="source-dot source-lastfm"></span>
+          <span class="source-name">Last.fm</span>
+          <span class="source-badge-label">API key required</span>
+        </div>
+        <p class="source-desc">Genre discovery, similar artists, artist bios and listener counts. Most feature-complete source.</p>
+        <p class="source-desc">API key configured above — source is active when a key is present.</p>
+      </div>
+
+      <div class="source-card">
+        <div class="source-card-header">
+          <span class="source-dot source-musicbrainz"></span>
+          <span class="source-name">MusicBrainz</span>
+          <span class="source-badge-label source-free">No key needed</span>
+        </div>
+        <p class="source-desc">Genre/tag-based discovery. Comprehensive catalog, rate-limited to ~1 req/sec. No listener counts.</p>
+        <label class="form-check" style="margin-top:6px">
+          <input type="checkbox" name="source_musicbrainz"
+                 {% if config.get('source_musicbrainz', '1') == '1' %}checked{% endif %}>
+          <span>Enable MusicBrainz</span>
+        </label>
+      </div>
+
+      <div class="source-card">
+        <div class="source-card-header">
+          <span class="source-dot source-deezer"></span>
+          <span class="source-name">Deezer</span>
+          <span class="source-badge-label source-free">No key needed</span>
+        </div>
+        <p class="source-desc">Genre-based discovery using Deezer's genre catalogue. Includes artist images and fan counts.</p>
+        <label class="form-check" style="margin-top:6px">
+          <input type="checkbox" name="source_deezer"
+                 {% if config.get('source_deezer', '1') == '1' %}checked{% endif %}>
+          <span>Enable Deezer</span>
+        </label>
+      </div>
+
+      <div class="source-card">
+        <div class="source-card-header">
+          <span class="source-dot source-listenbrainz"></span>
+          <span class="source-name">ListenBrainz</span>
+          <span class="source-badge-label source-free">No key needed</span>
+        </div>
+        <p class="source-desc">Powers the Trending tab — globally most-listened artists by week, month, year, or all time.</p>
+        <label class="form-check" style="margin-top:6px">
+          <input type="checkbox" name="source_listenbrainz"
+                 {% if config.get('source_listenbrainz', '1') == '1' %}checked{% endif %}>
+          <span>Enable ListenBrainz</span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <h2 class="section-title">Discovery Options</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="min_listeners">Minimum Listeners</label>
+      <input class="form-input form-input--narrow" type="number" id="min_listeners" name="min_listeners"
+             value="{{ config.get('min_listeners', '10000') }}"
+             min="0" step="1000">
+      <p class="form-hint">Artists with fewer Last.fm listeners will be filtered out.</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="extra_genres">Additional Genres</label>
+      <input class="form-input" type="text" id="extra_genres" name="extra_genres"
+             value="{{ config.get('extra_genres', '') }}"
+             placeholder="ambient, drone, shoegaze">
+      <p class="form-hint">Comma-separated genre tags to include even if not in your library.</p>
+    </div>
+  </section>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+      <svg class="icon"><use href="#ic-check"/></svg>
+      Save Settings
+    </button>
+    <button type="button" class="btn btn-ghost btn-danger" onclick="clearCache()">
+      <svg class="icon"><use href="#ic-refresh"/></svg>
+      Clear Discovery Cache
+    </button>
+  </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function testConnection() {
+  const url = document.getElementById('lidarr_url').value.trim();
+  const key = document.getElementById('lidarr_api_key').value.trim();
+  const result = document.getElementById('test-result');
+  result.textContent = 'Testing…';
+  result.className = 'test-result';
+  fetch('/api/test-connection', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({url, api_key: key})
+  })
+  .then(r => r.json())
+  .then(d => {
+    result.textContent = d.ok ? 'Connected successfully' : `Failed: ${d.error}`;
+    result.className = 'test-result ' + (d.ok ? 'is-success' : 'is-error');
+  })
+  .catch(() => {
+    result.textContent = 'Request failed';
+    result.className = 'test-result is-error';
+  });
+}
+
+function clearCache() {
+  if (!confirm('Clear all cached discovery data?')) return;
+  fetch('/api/cache/clear', {method: 'POST'})
+    .then(() => showToast('Cache cleared', 'success'));
+}
+</script>
+{% endblock %}

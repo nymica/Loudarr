@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">Ignored Artists</h1>
+  <p class="page-subtitle">Artists hidden from discovery results.</p>
+</div>
+
+{% if artists %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Artist</th>
+      <th>MusicBrainz ID</th>
+      <th>Ignored</th>
+      <th class="col-actions">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in artists %}
+    <tr id="row-{{ a.id }}">
+      <td class="cell-name">{{ a.artist_name }}</td>
+      <td class="cell-mono cell-muted">{{ a.mbid or '—' }}</td>
+      <td class="cell-muted">{{ a.ignored_at[:16] }}</td>
+      <td class="col-actions">
+        <button class="btn btn-ghost btn-sm" onclick="unignore({{ a.id }}, this)">
+          <svg class="icon"><use href="#ic-trash"/></svg>
+          Remove
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="notice notice-info">No ignored artists.</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function unignore(id, btn) {
+  btn.disabled = true;
+  fetch(`/api/artist/unignore/${id}`, {method: 'POST'})
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        const row = document.getElementById(`row-${id}`);
+        row.style.opacity = '0';
+        row.style.transition = 'opacity 0.2s';
+        setTimeout(() => row.remove(), 200);
+        showToast('Removed from ignored list', 'success');
+      }
+    });
+}
+</script>
+{% endblock %}

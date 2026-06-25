@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">Library Health</h1>
+  <div class="page-actions">
+    <button class="btn btn-primary btn-sm" id="btn-scan">
+      <svg class="icon"><use href="#ic-activity"/></svg>
+      Scan Wanted
+    </button>
+    <button class="btn btn-ghost btn-sm" id="btn-rescan" style="display:none" title="Force re-scan, ignoring cache">
+      <svg class="icon"><use href="#ic-refresh"/></svg>
+      Re-scan
+    </button>
+  </div>
+</div>
+
+<p class="page-desc">
+  Checks each artist in your Lidarr wanted list against MusicBrainz to detect name mismatches
+  or broken IDs that might prevent albums from being matched. Results are cached for 24&nbsp;hours.
+</p>
+
+<div id="scan-loading" class="loading-state" style="display:none">
+  <div class="spinner"></div>
+  <p class="loading-label">Checking artists against MusicBrainz &mdash; this may take a minute on large libraries&hellip;</p>
+</div>
+
+<div id="scan-error" class="notice notice-error" style="display:none"></div>
+
+<div id="scan-prompt" class="notice notice-info" style="display:none">
+  Click <strong>Scan Wanted</strong> to check artists with missing albums against MusicBrainz for metadata issues.
+</div>
+
+<div id="scan-results" style="display:none">
+  <p id="scan-meta" class="scan-meta"></p>
+
+  <div id="scan-empty" class="notice notice-info" style="display:none">
+    No wanted albums found &mdash; your library is complete or nothing is monitored yet.
+  </div>
+
+  <table class="data-table" id="health-table" style="display:none">
+    <thead>
+      <tr>
+        <th class="col-health-status"></th>
+        <th>Artist (Lidarr)</th>
+        <th>MusicBrainz Name</th>
+        <th class="col-listeners">Missing</th>
+        <th>Issue</th>
+        <th class="col-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="health-tbody"></tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initLibraryHealthPage();
+</script>
+{% endblock %}

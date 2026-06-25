@@ -1,0 +1,14 @@
+services:
+  loudarr:
+    build: .
+    container_name: loudarr
+    ports:
+      - "5055:5000"
+    volumes:
+      - loudarr-data:/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+volumes:
+  loudarr-data:

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title">Discover Artists</h1>
+  <div class="page-actions">
+    <button class="btn btn-ghost btn-sm" id="btn-refresh" onclick="clearCacheAndReload()" title="Clear cache and refresh">
+      <svg class="icon"><use href="#ic-refresh"/></svg>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<div class="mode-tabs">
+  <button class="mode-tab is-active" data-mode="genre" onclick="switchMode('genre', this)">
+    <svg class="icon"><use href="#ic-signal"/></svg>
+    By Genre
+  </button>
+  <button class="mode-tab" data-mode="similar" onclick="switchMode('similar', this)">
+    <svg class="icon"><use href="#ic-users"/></svg>
+    Similar to Library
+  </button>
+  <button class="mode-tab" data-mode="trending" onclick="switchMode('trending', this)">
+    <svg class="icon"><use href="#ic-compass"/></svg>
+    Trending
+  </button>
+</div>
+
+<!-- Broad category tabs (By Genre mode) -->
+<div id="cat-bar" class="cat-bar">
+  <div id="cat-scroll" class="cat-scroll">
+    <div class="cat-loading">Loading categories&hellip;</div>
+  </div>
+</div>
+
+<!-- Sub-genre chips (By Genre mode, shown after category selection) -->
+<div id="sub-bar" class="sub-bar">
+  <div id="sub-scroll" class="sub-scroll"></div>
+</div>
+
+<!-- Trending range picker -->
+<div id="trending-bar" class="trending-bar" style="display:none">
+  <span class="trending-label">Range:</span>
+  <div class="range-tabs">
+    <button class="range-btn" data-range="week"     onclick="selectRange('week', this)">This Week</button>
+    <button class="range-btn is-active" data-range="month" onclick="selectRange('month', this)">This Month</button>
+    <button class="range-btn" data-range="year"     onclick="selectRange('year', this)">This Year</button>
+    <button class="range-btn" data-range="all_time" onclick="selectRange('all_time', this)">All Time</button>
+  </div>
+  <span class="trending-source-note">via ListenBrainz</span>
+</div>
+
+<div id="results-area">
+  <div id="loading-state" class="loading-state" style="display:none">
+    <div class="spinner"></div>
+    <p class="loading-label">Fetching suggestions&hellip; this may take a moment on first load.</p>
+  </div>
+
+  <div id="error-state" class="notice notice-error" style="display:none"></div>
+
+  <table class="data-table" id="artist-table" style="display:none">
+    <thead>
+      <tr>
+        <th class="col-name">Artist</th>
+        <th class="col-tags">Tags</th>
+        <th class="col-listeners">Listeners</th>
+        <th class="col-based" id="th-based" style="display:none">Based On</th>
+        <th class="col-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="artist-tbody"></tbody>
+  </table>
+
+  <div id="empty-state" class="notice notice-info" style="display:none">
+    No suggestions found. Try another genre, lower the minimum listeners in Settings, or enable more sources.
+  </div>
+
+  <div id="pagination" class="pagination" style="display:none"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initDiscoverPage();
+</script>
+{% endblock %}
