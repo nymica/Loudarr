@@ -52,21 +52,15 @@ Scans your Lidarr wanted list against MusicBrainz to detect name mismatches or b
 
 ## Installation
 
-### Docker Compose (simplest)
+### Docker Hub (pre-built image)
 
-```bash
-git clone https://github.com/nymica/loudarr.git
-cd loudarr
-docker compose up -d --build
-```
-
-Open **http://localhost:5055** — you will be redirected to Settings on first run.
+The easiest way to run Loudarr is with the pre-built image from Docker Hub:
 
 ```yaml
-# docker-compose.yml (included in the repo)
+# docker-compose.yml
 services:
   loudarr:
-    build: .
+    image: nymica/loudarr:latest
     container_name: loudarr
     ports:
       - "5055:5000"
@@ -76,6 +70,37 @@ services:
 
 volumes:
   loudarr-data:
+```
+
+```bash
+docker compose up -d
+```
+
+Open **http://localhost:5055** — you will be redirected to Settings on first run.
+
+---
+
+### TrueNAS SCALE
+
+In TrueNAS SCALE, navigate to **Apps → Discover Apps → Custom App** and fill in:
+
+| Field | Value |
+|---|---|
+| Image Repository | `nymica/loudarr` |
+| Image Tag | `latest` |
+| Container Port | `5000` |
+| Host Port | `5055` |
+| Storage — Mount Path | `/data` |
+| Storage — Type | Dataset or Host Path |
+
+---
+
+### Build from source
+
+```bash
+git clone https://github.com/nymica/loudarr.git
+cd loudarr
+docker compose up -d --build
 ```
 
 ---
