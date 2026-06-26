@@ -80,46 +80,6 @@ volumes:
 
 ---
 
-### TrueNAS SCALE — Community App Store
-
-The `ix-dev/community/loudarr/` directory follows the exact format used by the [truenas/apps](https://github.com/truenas/apps) community catalog (Docker Compose + Jinja2 templates, not Helm). It includes `app.yaml`, `item.yaml`, `ix_values.yaml`, `questions.yaml`, a Jinja2 `docker-compose.yaml` template, and the bundled `base_v2_3_4` Python rendering library.
-
-#### Step 1 — Publish the Docker image
-
-Push the repository to GitHub. The included GitHub Actions workflow (`.github/workflows/docker-publish.yml`) will automatically build and publish `ghcr.io/nymica/loudarr:latest` to the GitHub Container Registry on every push to `main`.
-
-You can also push manually:
-
-```bash
-docker build -t ghcr.io/nymica/loudarr:latest .
-docker push ghcr.io/nymica/loudarr:latest
-```
-
-#### Step 2 — Add to TrueNAS as a Custom App (quick path, no catalog needed)
-
-In TrueNAS SCALE, navigate to **Apps → Discover Apps → Custom App** and fill in:
-
-| Field | Value |
-|---|---|
-| Image Repository | `ghcr.io/nymica/loudarr` |
-| Image Tag | `latest` |
-| Container Port | `5000` |
-| Host Port | `5055` |
-| Storage — Mount Path | `/data` |
-| Storage — Type | Dataset or Host Path |
-
-#### Step 3 — Submit to the community catalog (optional)
-
-To make Loudarr installable from the TrueNAS Apps catalog for everyone:
-
-1. Fork [truenas/apps](https://github.com/truenas/apps)
-2. Copy `ix-dev/community/loudarr/` into the same path in the fork
-3. Open a pull request against the `master` branch
-
-The catalog format uses `ix_values.yaml` (not `values.yaml`), a Jinja2 `templates/docker-compose.yaml`, and the bundled `base_v2_3_4` rendering library — all already present in this repo at `ix-dev/community/loudarr/`.
-
----
-
 ## Configuration
 
 All settings are stored in the app's SQLite database (persisted in the `loudarr-data` Docker volume) and are configurable from the **Settings** page.
